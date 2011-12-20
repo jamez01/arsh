@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 ARSH_INSTALL_PATH="."
 require 'readline'
 Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
@@ -12,7 +12,7 @@ Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
 ## Set up some default variables
 $ps1="(arsh)<% ENV['USER'] %>@<% Dir.pwd %>$ "
 $ps2=">"
-## Setup readline's completeion
+## Setup readline's completion
   Readline.completion_append_character =  nil
   Readline.completion_proc = proc do |prefix|
     # Complete files and directories
@@ -74,7 +74,7 @@ end
 
 end
 
-# Load Plugsins
+# Load Plugins
 begin
  Dir.glob("#{ARSH_INSTALL_PATH}/plugins/*.rb").each { |plugin| require plugin }
 rescue
