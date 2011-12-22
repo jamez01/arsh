@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
-ARSH_INSTALL_PATH="."
-require 'readline'
+ARSH_INSTALL_PATH=File.expand_path("../../",__FILE__)
+puts ARSH_INSTALL_PATH
+require 'rb-readline'
+
 Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
 trap('QUIT',"IGNORE")
 trap('INT') do
@@ -15,38 +17,25 @@ $ps1="(arsh)<% ENV['USER'] %>@<% Dir.pwd %>$ "
 $ps2=">"
 
 ## Setup readline's completion
-Readline.completion_append_character = "" 
+Readline.completion_append_character = nil 
 Readline.completion_proc = lambda do |search|
   # Complete files and directories
   # Complete programs and files within the path.
   files = []
-  ENV['PATH'].split(":").each do |path|
-    begin
-      Dir.entries(path).each do |prog|
-        files << prog 
-      end
-    rescue Errno::ENOENT
-      next
-    end
-  end
-  Dir.glob("*").each do |f|
-    if File.directory?(f)
-      Dir["#{File.expand_path(f)}/*","#{File.expand_path(f)}"].each do |p|
-        p = p.gsub("#{Dir.pwd}/","")
-        unless p == f
-          files << p
-        else
-          files << "#{p}/"
-        end
-      end
-    else
-      files << f
+  case search
+  when ""
+    files = ArshCommands.search_current_directory(files,search)
+    files = ArshCommands.search_path(files)
+  else
+    files = ArshCommands.search_current_directory(files,search)
+    if files.select { |f| f =~ %r[^#{search}] }.empty?
+      files = ArshCommands.search_path(files)
     end
   end
   # Complete builtin methods
   ArshCommands.singleton_methods.each { |method| files << method if method =~ /^#{search}/ }
   files.uniq
-  files = files.select { |f| f =~ %r[#{search}] }
+  files = files.select { |f| f =~ %r[^#{search}] }
 end
 
 # Builtin commands
@@ -94,6 +83,40 @@ module ArshCommands
     end
   end
 
+  def self.search_current_directory(files,search)
+    Dir["#{search.gsub(%r[^/],"")}*"].each { |f| files << f }
+
+    files.map! { |f| f.gsub(%r[#{Dir.pwd}/],"") }.map! { |f| File.directory?(f) ? f + "/" : f }
+
+#    Dir.glob("*").each do |f|
+#      if File.directory?(f)
+#        Dir["#{File.expand_path(f)}/*","#{File.expand_path(f)}"].each do |p|
+#          p = p.gsub("#{Dir.pwd}/","")
+#          unless p == f
+#            files << p
+#          else
+#            files << "#{p}/"
+#          end
+#        end
+#      else
+#        files << f
+#      end
+#    end
+    return files
+  end
+
+  def self.search_path(files)
+    ENV['PATH'].split(":").each do |path|
+      begin
+        Dir.entries(path).each do |prog|
+          files << prog if File.executable?("#{path}/#{prog}")
+        end
+      rescue Errno::ENOENT
+        next
+      end
+    end
+    return files
+  end
 end
 
 # Load Plugins
