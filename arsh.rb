@@ -15,7 +15,7 @@ $ps1="(arsh)<% ENV['USER'] %>@<% Dir.pwd %>$ "
 $ps2=">"
 
 ## Setup readline's completion
-Readline.completion_append_character =  nil
+Readline.completion_append_character = "" 
 Readline.completion_proc = lambda do |search|
   # Complete files and directories
   # Complete programs and files within the path.
@@ -27,6 +27,20 @@ Readline.completion_proc = lambda do |search|
       end
     rescue Errno::ENOENT
       next
+    end
+  end
+  Dir.glob("*").each do |f|
+    if File.directory?(f)
+      Dir["#{File.expand_path(f)}/*","#{File.expand_path(f)}"].each do |p|
+        p = p.gsub("#{Dir.pwd}/","")
+        unless p == f
+          files << p
+        else
+          files << "#{p}/"
+        end
+      end
+    else
+      files << f
     end
   end
   # Complete builtin methods
