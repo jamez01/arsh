@@ -2,28 +2,31 @@
 ARSH_INSTALL_PATH="."
 require 'readline'
 Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
- trap('QUIT',"IGNORE")
- trap('INT') { begin
-  break
+trap('QUIT',"IGNORE")
+trap('INT') do
+  begin
+    break
   rescue
-  print "^C"
+    print "^C"
   end
-  }
+end
 ## Set up some default variables
 $ps1="(arsh)<% ENV['USER'] %>@<% Dir.pwd %>$ "
 $ps2=">"
+
 ## Setup readline's completion
-  Readline.completion_append_character =  nil
-  Readline.completion_proc = lambda do |prefix|
-    # Complete files and directories
-    files = Dir["#{File.expand_path(prefix)}*"]
-    files.map { |f| File.expand_path(f) }.map { |f| File.directory?(f) ? f + "/" : f }
-    # Complete programs and files within the path.
-    ENV['PATH'].split(":").each { |path| Dir.entries(path).each { |prog| files << prog if prog =~ /^#{prefix}/  } }
-    # Complete builtin methods
-    ArshCommands.singleton_methods.each { |file| files << file if file =~ /^#{prefix}/ }
-    files.uniq
-  end
+Readline.completion_append_character =  nil
+Readline.completion_proc = lambda do |prefix|
+  # Complete files and directories
+  files = Dir["#{File.expand_path(prefix)}*"]
+  files.map { |f| File.expand_path(f) }.map { |f| File.directory?(f) ? f + "/" : f }
+  # Complete programs and files within the path.
+  ENV['PATH'].split(":").each { |path| Dir.entries(path).each { |prog| files << prog if prog =~ /^#{prefix}/  } }
+  # Complete builtin methods
+  ArshCommands.singleton_methods.each { |file| files << file if file =~ /^#{prefix}/ }
+  files.uniq
+  puts files.inspect
+end
 
 # Builtin commands
 
@@ -87,7 +90,7 @@ end
 # Main Loop
 
 # Load rbshrc's
-["/etc/arshrc","#{ENV['HOME']}/.arshrc"].each do |arrc|
+["/etc/arshrc","#{ENV['HOME']}/.arshrc"].each do |arshrc|
   File.open(arshrc,"r").readlines.each do |line|
     ArshCommands.parseinput(line) if line != ""
   end if File.exist?(arshrc)
