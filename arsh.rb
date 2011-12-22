@@ -16,16 +16,23 @@ $ps2=">"
 
 ## Setup readline's completion
 Readline.completion_append_character =  nil
-Readline.completion_proc = lambda do |prefix|
+Readline.completion_proc = lambda do |search|
   # Complete files and directories
-  files = Dir["#{File.expand_path(prefix)}*"]
-  files.map { |f| File.expand_path(f) }.map { |f| File.directory?(f) ? f + "/" : f }
   # Complete programs and files within the path.
-  ENV['PATH'].split(":").each { |path| Dir.entries(path).each { |prog| files << prog if prog =~ /^#{prefix}/  } }
+  files = []
+  ENV['PATH'].split(":").each do |path|
+    begin
+      Dir.entries(path).each do |prog|
+        files << prog 
+      end
+    rescue Errno::ENOENT
+      next
+    end
+  end
   # Complete builtin methods
-  ArshCommands.singleton_methods.each { |file| files << file if file =~ /^#{prefix}/ }
+  ArshCommands.singleton_methods.each { |method| files << method if method =~ /^#{search}/ }
   files.uniq
-  puts files.inspect
+  files = files.select { |f| f =~ %r[#{search}] }
 end
 
 # Builtin commands
@@ -43,20 +50,14 @@ module ArshCommands
    Kernel.exit(code.to_s.to_i)
   end
 
-  # Change directory
-  def self.cd(dir)
-    dir = ["#{ENV['HOME']}"] if dir.nitems == 0
-    if File.directory?(File.expand_path(dir.join(" "))) then Dir.chdir(File.expand_path(dir.join(" "))) else puts "Invalid Directory #{dir.to_s}" end
-  end
-
   # Determine if a file is included in the path.
   def self.in_path?(cmd,parms)
-   ENV['PATH'].split(/:/).each { |path|
+   ENV['PATH'].split(/:/).each do |path|
      if File.exists?("#{path}/#{cmd}") && File.executable?("#{path}/#{cmd}")
        system("#{path}/#{cmd} #{parms.join(" ")}")
        return true
      end
-   }
+   end
    return false
   end
 
@@ -102,7 +103,7 @@ while true
   begin
    prompt = ArshCommands.rubyeval_indent == 0 ? $ps1 : "#{$ps2 * ArshCommands.rubyeval_indent} "
    input = Readline::readline(ArshCommands.replacestring(prompt)).to_s.strip
-  rescue
+  rescue 
     puts ""
     input = ""
   end
