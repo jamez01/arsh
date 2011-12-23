@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+arsh = []
+ruby = "#!" + ENV['MY_RUBY_HOME'] + "/bin/ruby"
+gem_path = ENV['GEM_PATH']
+ENV['PATH'].split(':').each do |path|
+  Dir.glob("#{path}/arsh").each { |a| arsh << File.expand_path(a) }
+end
+
+if arsh.count > 1
+  puts "Duplicate entries found, which number you like to edit?\n\n"
+  0.upto(arsh.count - 1) do |elem|
+    puts "[#{elem}] #{arsh[elem]}"
+  end
+  edit = ""
+  until edit =~ /[0-9]+/
+    print "\nChoice: "
+    STDOUT.flush
+    edit = gets
+    unless edit =~ /[0-9]+/
+      puts "Invalid selection"
+    end
+  end
+  edit = edit.chomp.to_i
+else
+  edit = 0
+end
+
+unless arsh.empty?
+  file = File.open(arsh[edit]).readlines
+  file[0] =  ruby + "\n" + "ENV['GEM_PATH']='#{gem_path}'\n"
+  File.open(arsh[edit],"w") { |f| f.puts file }
+else
+  puts "No arsh binaries found in your PATH"
+end
