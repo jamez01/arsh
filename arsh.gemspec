@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.add_dependency "rb-readline"
  
   s.files        = Dir.glob("{bin,plugins,libs}/**/*")
-  s.executables  = ['arsh']
+  s.executables  = ['arsh','arsh_configure_for_rvm']
 end
