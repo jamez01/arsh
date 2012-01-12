@@ -2,7 +2,6 @@
 ARSH_INSTALL_PATH=File.expand_path("../../",__FILE__)
 require 'rubygems'
 require 'rb-readline'
-require 'rainbow'
 
 Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
 trap('QUIT',"IGNORE")
