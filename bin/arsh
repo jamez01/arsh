@@ -29,7 +29,7 @@ Readline.completion_proc = lambda do |search|
     end
   end
   # Complete builtin methods
-  ArshCommands.singleton_methods.each { |method| files << method if method =~ /^#{search}/ }
+  ArshCommands.singleton_methods.each { |method| files << method.to_s if method.to_s =~ /^#{search}/ }
   files.uniq
   files = files.select { |f| f =~ %r[^#{search}] }
 end
@@ -118,9 +118,9 @@ end
 # Load rbshrc's
 ["/etc/arshrc","#{ENV['HOME']}/.arshrc"].each do |arshrc|
   File.open(arshrc,"r").readlines.each do |line|
-    case line
-    when /^alias/
-      ArshCommands.alias(line.chomp.split(' ',2)[1..-1])
+    method = line.split[0]
+    unless ArshCommands.singleton_methods.grep(/^#{method}$/).empty?
+      ArshCommands.send(method, line.chomp.split(' ',2)[1..-1])
     else 
       ArshCommands.ruby_eval(line,false) if line != ""
     end
