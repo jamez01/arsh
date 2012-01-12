@@ -2,16 +2,17 @@
 ARSH_INSTALL_PATH=File.expand_path("../../",__FILE__)
 require 'rubygems'
 require 'rb-readline'
+require 'rainbow'
 
 Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
 trap('QUIT',"IGNORE")
-trap('INT') do
-  begin
-    break
-  rescue
-    print "^C"
-  end
-end
+#trap('INT') do
+#  begin
+#    break
+#  rescue
+#    print "^C"
+#  end
+#end
 ## Set up some default variables
 $ps1="(arsh)<% ENV['USER'] %>@<% Dir.pwd %>$ "
 $ps2=">"
@@ -30,6 +31,9 @@ Readline.completion_proc = lambda do |search|
     files = ArshCommands.search_current_directory(files,search)
     if files.select { |f| f =~ %r[^#{search}] }.empty?
       files = ArshCommands.search_path(files)
+    end
+    if files.select { |f| f =~ %r[^#{search}] }.empty?
+      files = ArshCommands.search_all(search)
     end
   end
   # Complete builtin methods
@@ -74,8 +78,8 @@ module ArshCommands
         puts "#{$!}" 
       end
     # If (full path) file is executable..
-    elsif File.exists?(cmd) && File.executable?(cmd) 
-      system("#{cmd} #{parms}")
+    elsif File.exists?(cmd) && File.executable?(cmd)
+      system("#{cmd} #{parms.join(' ')}")
     # If file is in PATH
     elsif ArshCommands.in_path?(cmd,parms) == false
     # Try to run input as ruby code.
@@ -84,7 +88,7 @@ module ArshCommands
   end
 
   def self.search_current_directory(files,search)
-    Dir["#{search.gsub(%r[^/],"")}*"].each { |f| files << f }
+    Dir["#{search.gsub(%r[^/],"")}*"].each { |f| files << f if File.directory?(f) || File.executable?(f) }
 
     files.map! { |f| f.gsub(%r[#{Dir.pwd}/],"") }.map! { |f| File.directory?(f) ? f + "/" : f }
 
@@ -101,6 +105,12 @@ module ArshCommands
         next
       end
     end
+    return files
+  end
+
+  def self.search_all(search)
+    files = Dir.glob("#{search}*")
+    files.map! { |f| File.directory?(f) ? "#{f}/" : f }
     return files
   end
 end
@@ -121,12 +131,19 @@ end
 end
 
 while true
-  
-# Get input
+  trap('INT') do
+    begin
+      break
+    rescue
+      print "^C"
+      break
+    end
+  end
   begin
    prompt = ArshCommands.rubyeval_indent == 0 ? $ps1 : "#{$ps2 * ArshCommands.rubyeval_indent} "
    input = Readline::readline(ArshCommands.replacestring(prompt)).to_s.strip
-  rescue 
+  rescue Exception => e
+    puts e 
     puts ""
     input = ""
   end
