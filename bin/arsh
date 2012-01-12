@@ -140,7 +140,6 @@ while true
    prompt = ArshCommands.rubyeval_indent == 0 ? $ps1 : "#{$ps2 * ArshCommands.rubyeval_indent} "
    input = Readline::readline(ArshCommands.replacestring(prompt)).to_s.strip
   rescue Exception => e
-    puts e 
     puts ""
     input = ""
   end
