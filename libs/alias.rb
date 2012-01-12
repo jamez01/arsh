@@ -17,5 +17,5 @@ module ArshCommands
 	    end
 	  EOS
     ArshCommands.module_eval(new_alias)
-    end
   end
+end
