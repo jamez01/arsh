@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/jamez01/arsh"
   s.summary     = "Linux shell implemented in pure Ruby"
   s.description = "Provides a shell that can run pure Ruby code as well as ordinary linux commands."
+  s.required_ruby_version = '>= 1.9.3'
  
   s.required_rubygems_version = ">= 1.3.6"
  
