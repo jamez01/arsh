@@ -1,7 +1,5 @@
 module ArshCommands
   def self.rvm(command)
-    $stdout.sync = true
-    $stderr.sync = true
     time = Time.now.to_i
     command = command.is_a?(Array) ? command.join(' ') : command
     case command
@@ -13,7 +11,14 @@ module ArshCommands
       end
       puts "\e[32mUsing #{ENV['GEM_HOME']}\e[0m"
     else
-      exec %Q{bash -c "source #{ENV['rvm_path']}/scripts/rvm; rvm #{command}"}
-     end
+      puts "\e[01;32mUsing Ctrl-C on this operation will push the operation to the background.\nThe operation will not stop\e[0m"
+      pid = ""
+      Process.fork do
+        pid = Process.pid
+        print "\n"
+        exec %Q{bash -c "source #{ENV['rvm_path']}/scripts/rvm; rvm #{command}"}
+      end
+      Process.waitpid(pid.to_i)
+    end
   end
 end
