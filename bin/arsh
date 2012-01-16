@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+ENV['TERM'] = 'ansi'
 ARSH_INSTALL_PATH=File.expand_path("../../",__FILE__)
 require 'rubygems'
 require 'rb-readline'
