@@ -1,6 +1,5 @@
 module ArshCommands
   def self.rvm(command)
-    time = Time.now.to_i
     command = command.is_a?(Array) ? command.join(' ') : command
     case command
     when /^use /
