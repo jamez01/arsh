@@ -23,7 +23,7 @@ Once that is done, modify your user shell to the new shell, logout, and log back
 Most of the Shell can be configured via 2 files.  /etc/arshrc for global configuration, and $HOME/.arshrc.  Environment variables can be configured there, as well as global variables and other configuration.  An example arshrc configuration file would look as follows
 
 ```ruby
-    $ps1="(arsh) \e[01;32m<% ENV['USER'] %>@<% `hostname`.chomp %>\e[01;34m <% Dir.pwd %> $\e[00m "
+    $ps1="(arsh) " + "<% ENV['USER'] %>@<% `hostname`.chomp %>".console_green.console_bold + "<% Dir.pwd %> $ ".console_blue.console_bold
     alias ls=ls --color
     ENV['PATH'] = "/usr/local/bin:/usr/bin:/bin:/opt/bin:/usr/x86_64-pc-linux-gnu/gcc-bin/4.5.3"
     ENV['HIST_COUNT'] = "1000"
@@ -31,3 +31,5 @@ Most of the Shell can be configured via 2 files.  /etc/arshrc for global configu
 ```
 
 The arshrc files are pure ruby, but multiple line evaluation is not currently possible.
+
+Color prompts are done via a monkey patch to the String class so as to not break line breaking.
