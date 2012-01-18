@@ -3,7 +3,7 @@ module ArshCommands
     command = command.is_a?(Array) ? command.join(' ') : command
     case command
     when /^use /
-      @output = %x{bash -c "source #{ENV['rvm_path']}/scripts/rvm; rvm #{command}; env | grep -i rvm"}
+      @output = %x{bash -c "source #{ENV['HOME']}/.rvm/scripts/rvm; rvm #{command}; env | grep -i rvm"}
       @output.split("\n").select { |l| l[/=/] }.each do |n|
         var, value = n.split(/=/,2)
         ENV[var] = value
@@ -15,7 +15,7 @@ module ArshCommands
       Process.fork do
         pid = Process.pid
         print "\n"
-        exec %Q{bash -c "source #{ENV['rvm_path']}/scripts/rvm; rvm #{command}"}
+        exec %Q{bash -c "source #{ENV['HOME']}/.rvm/scripts/rvm; rvm #{command}"}
       end
       Process.waitpid(pid.to_i)
     end
