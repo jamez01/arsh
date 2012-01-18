@@ -128,6 +128,11 @@ end
   end if File.exist?(arshrc)
 end
 
+ArshCommands::INTHIST << File.open("#{ENV['HOME']}/.arsh_history").readlines[0..(ENV['HIST_COUNT'].to_i - 1)]
+ArshCommands::INTHIST[0].map { |x| Readline::HISTORY.push(x.gsub(/^\[.*\] /,'').strip) }
+
+at_exit { File.open("#{ENV['HOME']}/.arsh_history","w") { |f| f.puts ArshCommands::INTHIST } }
+
 while true
   trap('INT') do
     begin
@@ -148,6 +153,11 @@ while true
   #begin  puts input.gsub(/\#\{*\}/,'\1') rescue puts "#{$!}" end
   Readline::HISTORY.push("#{input}") # Add command to history
   ArshCommands::INTHIST.push("[#{Time.now.strftime("%a %b %d %H:%M:%S")}] #{input}")
+  until ArshCommands::INTHIST.count <=  ENV['HIST_COUNT'].to_i
+    a.shift if ArshCommands::INTHIST
+  end
+
   # If command is builtin to shell...
   ArshCommands.parseinput(input)
 end
+
