@@ -40,7 +40,7 @@ end
 # Builtin commands
 
 module ArshCommands
-  INTHIST = Array.new
+  INTHIST = [[]]
   def internal_history
     @internal_history
   end
@@ -130,7 +130,11 @@ end
   end if File.exist?(arshrc)
 end
 
-ArshCommands::INTHIST << File.open("#{ENV['HOME']}/.arsh_history").readlines[0..(ENV['HIST_COUNT'].to_i - 1)]
+begin
+  ArshCommands::INTHIST << File.open("#{ENV['HOME']}/.arsh_history").readlines[0..(ENV['HIST_COUNT'].to_i - 1)]
+rescue
+  ArshCommands::INTHIST
+end
 ArshCommands::INTHIST[0].map { |x| Readline::HISTORY.push(x.gsub(/^\[.*\] /,'').strip) }
 
 at_exit { File.open("#{ENV['HOME']}/.arsh_history","w") { |f| f.puts ArshCommands::INTHIST } }
