@@ -159,8 +159,10 @@ while true
   #begin  puts input.gsub(/\#\{*\}/,'\1') rescue puts "#{$!}" end
   Readline::HISTORY.push("#{input}") # Add command to history
   ArshCommands::INTHIST.push("[#{Time.now.strftime("%a %b %d %H:%M:%S")}] #{input}")
-  until ArshCommands::INTHIST.count <=  ENV['HIST_COUNT'].to_i
-    a.shift if ArshCommands::INTHIST
+  if ENV['HIST_COUNT']
+    until ArshCommands::INTHIST.count <=  ENV['HIST_COUNT'].to_i
+      a.shift if ArshCommands::INTHIST
+    end
   end
 
   # If command is builtin to shell...
