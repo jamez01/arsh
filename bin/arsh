@@ -15,6 +15,9 @@ Readline.completion_proc = lambda do |search|
   # Complete files and directories
   # Complete programs and files within the path.
   files = []
+  if search =~ /^~/
+    search = search.gsub(/^~/,"#{ENV['HOME']}")
+  end
   case search
   when ""
     files = ArshCommands.search_current_directory(files,search)
