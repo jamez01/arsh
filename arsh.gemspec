@@ -1,7 +1,7 @@
 lib = File.expand_path('../lib/', __FILE__)
 $:.unshift lib unless $:.include?(lib)
  
-require './libs/version' unless defined? Arsh::VERSION
+require './lib/version' unless defined? Arsh::VERSION
  
 Gem::Specification.new do |s|
   s.name        = "arsh"
@@ -18,6 +18,6 @@ Gem::Specification.new do |s|
  
   s.add_dependency "rb-readline"
  
-  s.files        = Dir.glob("{bin,plugins,libs}/**/*")
+  s.files        = Dir.glob("{bin,plugins,lib}/**/*")
   s.executables  = ['arsh','arsh_configure_for_rvm']
 end

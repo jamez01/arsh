@@ -3,7 +3,7 @@ ARSH_INSTALL_PATH=File.expand_path("../../",__FILE__)
 require 'rubygems'
 require 'rb-readline'
 
-Dir.glob("#{ARSH_INSTALL_PATH}/libs/*.rb").each { |mod| load(mod) }
+Dir.glob("#{ARSH_INSTALL_PATH}/lib/*.rb").each { |mod| load(mod) }
 trap('QUIT',"IGNORE")
 ## Set up some default variables
 $ps1="(arsh)<% ENV['USER'] %>@<% Dir.pwd %>$ "
